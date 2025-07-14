@@ -51,7 +51,6 @@ void filesSheeesh(std::vector<std::string> filesList,int i) {
 
 int main() {
 
-	std::cout << "hi, idiot\n";
     std::cout<<"enter the size of the final file in the lines\n";
     int i = 0;
     std::cin>>i;
