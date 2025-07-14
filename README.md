@@ -1,7 +1,8 @@
 # raz-b
 A simple utility for splitting text files into multiple parts with a specified number of lines.
+> Wrote this to automate some repetitive work. Yes, I know the code sucks - PRs welcome! :D
 
-Description
+## Description
 The program allows you to:
 
 View files in the current directory
@@ -12,7 +13,7 @@ Specify the number of lines per output file
 
 Automatically generate split files
 
-Usage
+## Usage
 Compile the program:
 
 ```sh
@@ -29,14 +30,14 @@ Select a file from the list by its number
 
 The program will create files in the format copy1_original.txt, copy2_original.txt, etc.
 
-Features
+## Features
 The first and last lines of the original file are preserved in each output file
 
 Supports all text files in the current directory
 
 Simple console-based interface
 
-Requirements
+## Requirements
 A C++17-compatible compiler
 
 Standard filesystem library (std::filesystem)
