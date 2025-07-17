@@ -5,78 +5,194 @@
 
 namespace fs = std::filesystem;
 
-void filesSheeesh(std::vector<std::string> filesList,int i) {
-    int numfile = 0;
-    std::cout << "choose file: ";
-    std::cin >> numfile;
-    std::cout << "its " << filesList[numfile] << "\nin progress . . .\n";
+void inputCountLine(int& sizeFilesByLines) {
+    std::cout << "Specify the number of lines: ";
+    
+    int lines = 0;
+    std::cin >> lines;
 
-    std::ifstream file(filesList[numfile]);
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cerr << "Seriously? This is not a number, but some kind of nonsense.\n";
+        inputCountLine(sizeFilesByLines);
+    }
 
-    if (!file.is_open()) {
-        std::cerr << "file HYETA\n";
+    if (lines > 0) sizeFilesByLines = lines;
+    else {
+        std::cout << "Seriously? This is not a number, but some kind of nonsense.\n";
         return;
     }
 
-    std::vector<std::string> fileByLines;
+    system("cls");
+}
+void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
+
+void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
+    std::cout << "raz-b ver: 0.2\n";
+    std::cout << "0. Start\n";
+    std::cout << "1. Specify the number of lines for splitting. Currently set to: " << sizeFilesByLines << std::endl;
+    std::cout << "2. Keep original header & footer? Currently set to: " << std::boolalpha << saveFirstNLastLines << std::endl;
+
+    int answer = 0;
+    std::cin >> answer;
+    switch (answer){
+    case 0: 
+        chooseFile(sizeFilesByLines, saveFirstNLastLines, sizeFilesByLines);
+        break;
+    case 1:
+        inputCountLine(sizeFilesByLines);
+        menu(sizeFilesByLines, saveFirstNLastLines);
+        break;
+    case 2:
+        saveFirstNLastLines = !saveFirstNLastLines;
+        system("cls");
+        menu(sizeFilesByLines,saveFirstNLastLines);
+        break;
+     
+    default:
+        menu(sizeFilesByLines, saveFirstNLastLines);
+        break;
+    }
+
+}
+
+std::vector<fs::path> getListOfFiles() {
+    
+    std::vector<fs::path> outListPath;
+
+    for (const auto& entry : fs::directory_iterator(".")) {
+        if (entry.is_regular_file()) {
+            outListPath.push_back(entry);
+        }
+    }
+
+    return outListPath;
+
+}
+
+std::vector<std::string> readFile(fs::path file) {
+    
+    std::vector<std::string> fileByLine;
+    std::ifstream inputFile(file);
     std::string line;
-    while (std::getline(file, line)) {
-        fileByLines.push_back(line);
-    }
+    if(inputFile){
 
-    file.close();
-
-    int targetNumFiles = (fileByLines.size() - 2) / i;
-    std::cout << "files will be created:" << targetNumFiles << std::endl;
-
-    std::string fileNameOut;
-
-    for (int j = 0; j < targetNumFiles; j++) {
-        fileNameOut = "copy" + std::to_string(j + 1) + '_' + filesList[numfile];
-        std::cout << fileNameOut << std::endl;
-        std::ofstream outfile(fileNameOut);
-        if (!outfile) {
-            std::cerr << "lox xuli))" << std::endl;
-            return;
+        while (std::getline(inputFile, line)) {
+            fileByLine.push_back(line);
         }
 
-        outfile << fileByLines[0] << std::endl;
-        for (int y = 1 + (i * j); y <= i * j + i; y++) {
-            outfile << fileByLines[y] << std::endl;
-        }
-        outfile << fileByLines[fileByLines.size() - 1];
-        outfile.close();
     }
+    else {
+        std::cout << "File said: 'Nope, not today!'\n";
+    }
+    return fileByLine;
+}
+
+void writeFile(std::vector<std::string> outFileByLine, std::string nameFile) {
+
+    std::ofstream outFile(nameFile);
+
+    for (const auto& i : outFileByLine) {
+        outFile << i << "\n";
+    }
+    std::cout << "file " << nameFile << " writing succes\n";
+}
+
+void writeFileWithFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) {
+    
+    int countFiles = 0;
+    countFiles = (fileByLine.size() + countLines - 1) / countLines; 
+    
+    
+    std::vector<std::string> separetedFileByLines;
+    separetedFileByLines.reserve(2 + countLines);
+
+    std::string newFileName;
+    
+    for (int i = 0; i < countFiles; i++) {
+        separetedFileByLines.clear();
+        separetedFileByLines.push_back(fileByLine[0]);
+        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + 1 + i * countLines, fileByLine.data() + 1 + i * countLines + countLines);
+        if (i + 1 != countFiles) separetedFileByLines.push_back(fileByLine.back());
+        newFileName = nameFile;
+        writeFile(separetedFileByLines, newFileName.insert(nameFile.find("."),( "_copy_" + std::to_string(i + 1 ))));
+    }
+
+    
+}
+
+void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) { //дописать
+    
+    int countFiles = 0;
+    countFiles = (fileByLine.size() + countLines - 1) / countLines;
+
+    std::vector<std::string> separetedFileByLines;
+    separetedFileByLines.reserve(countLines);
+
+    std::string newFileName;
+
+    for (int i = 0; i < countFiles; i++) {
+        separetedFileByLines.clear();
+        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + i * countLines, fileByLine.data() + i * countLines + countLines);
+        newFileName = nameFile;
+        if (separetedFileByLines.empty()) break;
+        writeFile(separetedFileByLines, newFileName.insert(nameFile.find("."), ("_copy_" + std::to_string(i + 1))));
+    }
+}
+
+void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines) {
+    std::vector<fs::path> paths = getListOfFiles();
+
+    int iterator = 0;
+
+    for (const auto& i : paths) {
+        iterator++;
+        std::cout << iterator << ':' << i.string().erase(0,2) << std::endl;
+    }
+    std::cout << "Select file to split: ";
+    
+    int choosenFile = -1;
+    std::cin >> choosenFile;
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cerr << "Seriously? This is not a number, but some kind of nonsense.\n";
+        chooseFile(sizeFilesByLines, saveFirstNLastLines, countLines);
+    }
+    if (choosenFile > 0 && choosenFile <= paths.size()) {
+        std::cout << "Choosen file: " << paths[choosenFile - 1].string().erase(0, 2) << std::endl;
+    }
+    else{
+        std::cout << "Out of range...\n";
+        chooseFile(sizeFilesByLines, saveFirstNLastLines, countLines);
+    }
+
+    std::vector<std::string> separetedFile = readFile(paths[choosenFile - 1]);
+
+    if (separetedFile.empty()) {
+        std::cout << "file empty :)\n";
+        chooseFile(sizeFilesByLines, saveFirstNLastLines, countLines);
+    }
+
+    if (saveFirstNLastLines)
+        writeFileWithFirstNLast(separetedFile, countLines, paths[choosenFile-1].string().erase(0,2));
+    else
+        writeFileWithoutFirstNLast(separetedFile, countLines, paths[choosenFile - 1].string().erase(0, 2));
+
+
+
 }
 
 int main() {
 
-    std::cout<<"enter the size of the final file in the lines\n";
-    int i = 0;
-    std::cin>>i;
-    std::cout << "well, files well be split into " << i << " lines\n";
+    //main menu
 
-    std::string path =".";
-    std::vector<std::string> filesList;
-    try{
-        std::cout<<"list of"<<path<<":\n";
+    int sizeFilesByLines = 10;
+    bool saveFirstNLastLines = false;
 
-        int counter = 0;
+    menu(sizeFilesByLines, saveFirstNLastLines);
 
-        for(const auto& entry:fs::directory_iterator(path)){
-            std::cout<<counter<<": " << entry.path().filename().string() << std::endl;
-            filesList.push_back(entry.path().filename().string());
-            counter++;
-        }
-    }
-    catch (const fs::filesystem_error& e) {
-        std::cerr << "pshol naxui: " << e.what() << '\n';
-    }
-
-    while (true) {
-        filesSheeesh(filesList, i);
-    }
-    
 
 	return 0;
 }
