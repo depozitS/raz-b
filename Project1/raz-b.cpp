@@ -1,10 +1,13 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <vector>
 #include <filesystem>
 #include <fstream>
+#include <variant>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
+void logoPrint();
 void inputCountLine(int& sizeFilesByLines) {
     std::cout << "Specify the number of lines: ";
     
@@ -28,31 +31,52 @@ void inputCountLine(int& sizeFilesByLines) {
 }
 void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
 
-void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
-    std::cout << "raz-b ver: 0.2\n";
-    std::cout << "0. Start\n";
-    std::cout << "1. Specify the number of lines for splitting. Currently set to: " << sizeFilesByLines << std::endl;
-    std::cout << "2. Keep original header & footer? Currently set to: " << std::boolalpha << saveFirstNLastLines << std::endl;
+std::variant<int> typedInput() {
+    std::string input;
+    std::cin >> input;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    int answer = 0;
-    std::cin >> answer;
-    switch (answer){
-    case 0: 
-        chooseFile(sizeFilesByLines, saveFirstNLastLines, sizeFilesByLines);
-        break;
-    case 1:
-        inputCountLine(sizeFilesByLines);
-        menu(sizeFilesByLines, saveFirstNLastLines);
-        break;
-    case 2:
-        saveFirstNLastLines = !saveFirstNLastLines;
-        system("cls");
-        menu(sizeFilesByLines,saveFirstNLastLines);
-        break;
-     
-    default:
-        menu(sizeFilesByLines, saveFirstNLastLines);
-        break;
+    std::istringstream iss(input);
+    int outputValueInt;
+    if (iss >> outputValueInt && iss.eof()) {
+        return outputValueInt;
+    }
+    else {
+        std::cout << "Seriously? This is not a number, but some kind of nonsense.\n";
+        
+    }
+    
+
+}
+
+void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
+
+    while (true) {
+
+        logoPrint();
+        std::cout << "ver: 0.2\n\n";
+        std::cout << "0. Start\n";
+        std::cout << "1. Specify the number of lines for splitting. Currently set to: " << sizeFilesByLines << std::endl;
+        std::cout << "2. Keep original header & footer? Currently set to: " << std::boolalpha << saveFirstNLastLines << std::endl;
+
+        int answer = typedInput();
+        switch (answer) {
+        case 0:
+            chooseFile(sizeFilesByLines, saveFirstNLastLines, sizeFilesByLines);
+            return;
+        case 1:
+            inputCountLine(sizeFilesByLines);
+            
+            break;
+        case 2:
+            saveFirstNLastLines = !saveFirstNLastLines;
+            system("cls");
+            break;
+
+        default:
+            break;
+        }
     }
 
 }
@@ -122,7 +146,7 @@ void writeFileWithFirstNLast(std::vector<std::string> fileByLine, int countLines
     
 }
 
-void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) { //дописать
+void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) { //РґРѕРїРёСЃР°С‚СЊ
     
     int countFiles = 0;
     countFiles = (fileByLine.size() + countLines - 1) / countLines;
@@ -184,7 +208,11 @@ void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int coun
 
 }
 
+
+
 int main() {
+    
+
 
     //main menu
 
