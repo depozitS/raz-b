@@ -2,6 +2,8 @@
 A simple utility for splitting text files into multiple parts with a specified number of lines.
 > Wrote this to automate some repetitive work. Yes, I know the code sucks - PRs welcome! :D
 
+>I got carried away with something and plan to make a file processor out of it. I'll update the REAMDE file sometime 
+
 ## Description
 The program allows you to:
 
