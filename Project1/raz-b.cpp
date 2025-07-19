@@ -3,64 +3,42 @@
 #include <filesystem>
 #include <fstream>
 #include <variant>
-#include <sstream>
+
+#include "inputCLIFile.h"
 
 namespace fs = std::filesystem;
 
 void logoPrint();
-void inputCountLine(int& sizeFilesByLines) {
-    std::cout << "Specify the number of lines: ";
-    
-    int lines = 0;
-    std::cin >> lines;
+void inputCountLine(int& sizeFilesByLines) { //done
+    while (true) {
+        std::cout << "Specify the number of lines: ";
 
-    if (std::cin.fail()) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cerr << "Seriously? This is not a number, but some kind of nonsense.\n";
-        inputCountLine(sizeFilesByLines);
+        int lines = correctInput<int>();
+
+        if (lines > 0) {
+            sizeFilesByLines = lines;
+            return;
+        }
+        else {
+            std::cout << "You cannot enter 0 or a negative number. I thought this was logical.\n";
+        }
     }
-
-    if (lines > 0) sizeFilesByLines = lines;
-    else {
-        std::cout << "Seriously? This is not a number, but some kind of nonsense.\n";
-        return;
-    }
-
     system("cls");
 }
 void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
-
-std::variant<int> typedInput() {
-    std::string input;
-    std::cin >> input;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    std::istringstream iss(input);
-    int outputValueInt;
-    if (iss >> outputValueInt && iss.eof()) {
-        return outputValueInt;
-    }
-    else {
-        std::cout << "Seriously? This is not a number, but some kind of nonsense.\n";
-        
-    }
-    
-
-}
 
 void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
 
     while (true) {
 
+        system("cls");
         logoPrint();
         std::cout << "ver: 0.2\n\n";
         std::cout << "0. Start\n";
         std::cout << "1. Specify the number of lines for splitting. Currently set to: " << sizeFilesByLines << std::endl;
         std::cout << "2. Keep original header & footer? Currently set to: " << std::boolalpha << saveFirstNLastLines << std::endl;
 
-        int answer = typedInput();
+        int answer = correctInput<int>();
         switch (answer) {
         case 0:
             chooseFile(sizeFilesByLines, saveFirstNLastLines, sizeFilesByLines);

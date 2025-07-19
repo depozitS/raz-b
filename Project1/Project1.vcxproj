@@ -129,8 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="InputCLIFunc.cpp" />
     <ClCompile Include="logo.cpp" />
     <ClCompile Include="raz-b.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inputCLIFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

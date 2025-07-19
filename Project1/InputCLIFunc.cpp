@@ -1,13 +1,12 @@
-#include <variant>
+#include "inputCLIFile.h"
+
 #include <sstream>
 #include <iostream>
-#include <string>
 
 std::variant<int, std::string> typedInput() {
 
 	std::string inputData;
 	std::getline(std::cin, inputData);
-	std::cin.clear();
 
 	std::istringstream iss(inputData);
 	int outInt;
@@ -17,7 +16,6 @@ std::variant<int, std::string> typedInput() {
 	else {
 		return inputData;
 	}
-
 }
 
 template <typename T>
