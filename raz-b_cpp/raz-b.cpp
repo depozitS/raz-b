@@ -9,7 +9,8 @@
 namespace fs = std::filesystem;
 
 void logoPrint();
-void inputCountLine(int& sizeFilesByLines) { //done
+
+void inputCountLine(int& sizeFilesByLines) { 
     while (true) {
         std::cout << "Specify the number of lines: ";
 
@@ -26,6 +27,7 @@ void inputCountLine(int& sizeFilesByLines) { //done
     system("cls");
 }
 void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
+
 
 void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
 
@@ -100,23 +102,24 @@ void writeFile(std::vector<std::string> outFileByLine, std::string nameFile) {
     }
     std::cout << "file " << nameFile << " writing succes\n";
 }
-
+// HACK выдаёт ошибку в некотрых случаях, исправить
 void writeFileWithFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) {
     
     int countFiles = 0;
-    countFiles = (fileByLine.size() + countLines - 1) / countLines; 
-    
+    countFiles = (fileByLine.size() - 2 + countLines - 3) / (countLines - 2); 
     
     std::vector<std::string> separetedFileByLines;
-    separetedFileByLines.reserve(2 + countLines);
+    separetedFileByLines.reserve(countLines);
 
     std::string newFileName;
-    
+    int rightBorder;
     for (int i = 0; i < countFiles; i++) {
         separetedFileByLines.clear();
         separetedFileByLines.push_back(fileByLine[0]);
-        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + 1 + i * countLines, fileByLine.data() + 1 + i * countLines + countLines);
-        if (i + 1 != countFiles) separetedFileByLines.push_back(fileByLine.back());
+        if (1 + i * countLines + countLines >= fileByLine.size()) rightBorder = fileByLine.size() - 2;
+        else rightBorder = 1 + i * countLines + countLines;
+        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + 1 + i * countLines, fileByLine.data() + rightBorder);
+        separetedFileByLines.push_back(fileByLine[rightBorder + 1]);
         newFileName = nameFile;
         writeFile(separetedFileByLines, newFileName.insert(nameFile.find("."),( "_copy_" + std::to_string(i + 1 ))));
     }
@@ -124,19 +127,22 @@ void writeFileWithFirstNLast(std::vector<std::string> fileByLine, int countLines
     
 }
 
-void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) { //дописать
+void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile) { 
     
     int countFiles = 0;
     countFiles = (fileByLine.size() + countLines - 1) / countLines;
-
+    
     std::vector<std::string> separetedFileByLines;
     separetedFileByLines.reserve(countLines);
 
     std::string newFileName;
+    int rightBorder;
 
     for (int i = 0; i < countFiles; i++) {
         separetedFileByLines.clear();
-        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + i * countLines, fileByLine.data() + i * countLines + countLines);
+        if (fileByLine.size() < i * countLines + countLines) rightBorder = fileByLine.size() - 1;
+        else rightBorder = i * countLines + countLines;
+        separetedFileByLines.insert(separetedFileByLines.end(), fileByLine.data() + i * countLines, fileByLine.data() + rightBorder);
         newFileName = nameFile;
         if (separetedFileByLines.empty()) break;
         writeFile(separetedFileByLines, newFileName.insert(nameFile.find("."), ("_copy_" + std::to_string(i + 1))));
@@ -185,8 +191,6 @@ void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int coun
 
 
 }
-
-
 
 int main() {
     
