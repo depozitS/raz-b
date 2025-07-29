@@ -9,7 +9,21 @@
 namespace fs = std::filesystem;
 
 void logoPrint();
+void inputCountLine(int& sizeFilesByLines);
+void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
+void menu(int& sizeFilesByLines, bool& saveFirstNLastLines);
+std::vector<fs::path> getListOfFiles(fs::path folder = ".");
+std::vector<std::string> readFile(fs::path file);
+void writeFile(std::vector<std::string> outFileByLine, std::string nameFile);
+void writeFileWithFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile);
+void writeFileWithoutFirstNLast(std::vector<std::string> fileByLine, int countLines, std::string nameFile);
+void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
+int main();
 
+/**
+ * @brief Reads a positive integer from user and stores in sizeFilesByLines.
+ * @param sizeFilesByLines [out] Number of lines per file.
+ */
 void inputCountLine(int& sizeFilesByLines) { 
     while (true) {
         std::cout << "Specify the number of lines: ";
@@ -26,8 +40,8 @@ void inputCountLine(int& sizeFilesByLines) {
     }
     system("cls");
 }
-void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
 
+void chooseFile(int& sizeFilesByLines, bool& saveFirstNLastLines, const int countLines);
 
 void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
 
@@ -61,11 +75,12 @@ void menu(int& sizeFilesByLines, bool& saveFirstNLastLines) {
 
 }
 
-std::vector<fs::path> getListOfFiles() {
+// @brief returns all files (non-recursive) from the 'folder'
+std::vector<fs::path> getListOfFiles(fs::path folder = ".") {
     
     std::vector<fs::path> outListPath;
-
-    for (const auto& entry : fs::directory_iterator(".")) {
+    
+    for (const auto& entry : fs::directory_iterator(folder)) {
         if (entry.is_regular_file()) {
             outListPath.push_back(entry);
         }
